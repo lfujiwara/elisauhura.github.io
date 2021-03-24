@@ -6,6 +6,7 @@ This blog is made using GitHub Pages so you can open issues or send PR with corr
 
 ## Posts
 
+- [+001 - Objective-C](/posts/objc.html)
 - [+000 - BLANK POST](/posts/blank.html)
 
 -//-
