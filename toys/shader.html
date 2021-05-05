@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shader</title>
+    <style>
+        body {
+            background-color: beige;
+            
+            display: grid;
+            grid-template-columns: 70% 30%;
+            grid-template-rows: 100%;
+            grid-gap: 1rem;
+
+            width: calc(100vw - 3rem);
+            height: calc(100vh - 2rem);
+            padding: 0;
+            margin: 1rem;
+        }
+
+        #editor {
+            display: inline-grid;
+            grid-template-rows: min-content 1fr;
+        }
+
+        tabs {
+            display: flex;
+        }
+
+        tabs>div {
+            background-color: white;
+            font-size: 1.2rem;
+            border: black 0.15rem solid;
+            border-left: none;
+            border-bottom: none;
+            text-align: center;
+
+            color: gray;
+
+            padding: 0.5rem 0.5rem 0.3rem 0.5rem;
+            min-width: 4rem;
+        }
+
+        tabs>div:first-child {
+            border-left: black 0.15rem solid;
+        }
+
+        tabs>div.active {
+            color: black;
+        }
+
+        v {
+            background-color: white;
+            border: black 0.15rem solid;
+            overflow: scroll;
+            display: grid;
+        }
+
+        v>pre {
+            display: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        v>pre.active {
+            display: block;
+        }
+
+        [contenteditable] {
+            outline: 0px solid transparent;
+        }
+
+        #side {
+            overflow: scroll;
+        }
+
+        canvas {
+            height: 300px;
+            width: 300px;
+        }
+
+        #jscanvas {
+            background-color: blue;
+        }
+
+        #glslcanvas {
+            background-color: coral;
+        }
+        
+        .boxed {
+            overflow: scroll;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
+    integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
+    crossorigin="anonymous" defer></script>
+</head>
+<body>
+    <div id="editor">
+        <tabs>
+            <div onclick="switchPane(event)" x_tgt="#jstext" class="active">
+                JS
+            </div>
+            <div onclick="switchPane(event)" x_tgt="#glsltext">
+                GLSL
+            </div>
+        </tabs>
+        <v>
+            <pre id="jstext" contenteditable="true" onkeydown="catchKey(event)" onkeyup="defaultKey(event)" onkeypress="defaultKey(event)"  class="active">// Digite aqui seu código JS para gerar uma imagem
+
+// As janelas tem um tamanho fixo de 6000x6000
+const WIDTH = 6000;
+const HEIGHT = 6000;
+
+// Constantes do limite o plano cartesiano
+const Xi = -1.0;
+const Xj = +1.0;
+const Yi = -1.0;
+const Yj = +1.0;
+
+const Xd = Xj - Xi;
+const Yd = Yj - Yi;
+
+const main = (data) => {
+    //Data é um array de bytes que representa a imagem
+    //O valor mínimo é 0 e o máximo é 255
+    //A cada 4 bytes temos um pixel
+    //Red Green Blue Alpha
+
+    //Vamos usar o for para percorrer cada pixel
+    for(let i = 0; i < data.length; i += 4) {
+        const _x = Math.floor((i/4) % 6000);
+        const _y = Math.floor((i/4) / 6000);
+
+        //converte para um plano cartesiano indo de Xi-Xj e Yi-Yj.
+        const x = Xi + (_x/WIDTH) * Xd;
+        const y = Yj - (_y/HEIGHT) * Yd;
+
+        //****************************
+        //compute a cor do pixel aqui
+
+        // ex: pintar de acordo com a distância do centro
+        // (a distância máxima para os Xi-Xj e Yi-Yj atuais é raiz de 2)
+        // (essa distância não é distância em si, eu sei)
+
+        const distancia = (x*x + y*y)/2;
+
+        // transforma num número entre 0 e 255
+        // invertido para o meio ser branco
+        const corrigido = 255 - distancia*255;
+
+        // para dar uma cor podemos variar a presença de verde pelo y
+        // e o de azul pelo x
+
+        const fator_verde = (y+1)/2;
+        const fator_azul = (x+1)/2;
+
+        // note que o próprio JS vai converter o número
+        // para um inteiro entre 0 e 255 ;)
+
+        const red = corrigido;
+        const green = corrigido * fator_verde;
+        const blue = corrigido * fator_azul;
+
+        //*****************************
+        
+        //define a cor do pixel
+        data[i]   = red;
+        data[i+1] = green;
+        data[i+2] = blue;
+        data[i+3] = 255;
+    }
+};
+
+// O nome da função a ser executada retornada deve aparecer no final
+// clique em Run JS e aguarde um pouco para o seu código executar
+main</pre>
+            <pre id="glsltext" contenteditable="true" onkeydown="catchKey(event)" onkeyup="defaultKey(event)" onkeypress="defaultKey(event)">// Digite aqui seu código GLSL para gerar uma imagem
+// O GLSL é muito próximo do C, mas não é idêntico.
+
+// Essa linha vai definir a precisão do float,
+// e mediump é bom o bastante no momento.
+precision mediump float;
+
+// Aqui não tem conversão automática entre int e float
+// Então coloque .0 quando precisar de floats
+
+// As janelas tem um tamanho fixo de 6000x6000
+#define WIDTH (6000.0)
+#define HEIGHT (6000.0)
+
+// Constantes do limite do plano cartesiano
+#define Xi (-1.0)
+#define Xj (+1.0)
+#define Yi (-1.0)
+#define Yj (+1.0)
+
+#define Xd (Xj - Xi)
+#define Yd (Yj - Yi)
+
+
+// diferente do código em JS
+// a GPU roda essa função main para cada pixel
+void main() {
+    // Aqui o pixel é guardado num vetor de 4 floats
+    // Também segue o formato RGBA, mas dessa vez
+    // os campos variam de 0.0 a 1.0
+
+    // vamos obter as coordenadas do plano a partir da
+    // variável gl_FragCoord que é pré definida para cada pixel
+    vec2 xy = (gl_FragCoord.xy / vec2(WIDTH, HEIGHT) * vec2(Xd, Yd)) + vec2(Xi, Yi);
+
+    // Para acessa o x ou o y individualmente é só usar
+    // xy.x e xy.y respectivamente
+    float x = xy.x;
+    float y = xy.y;
+
+    //****************************
+    //compute a cor do pixel aqui
+
+    // ex: pintar de acordo com a distância do centro
+    // usaremos a função help para ajudar a computar a distância
+
+    float distancia = (x*x + y*y)/2.0;
+
+    // invertido para o meio ser branco
+    float corrigido = 1.0 - distancia;
+
+    // para dar uma "cor" podemos variar a presença de verde pelo y
+    // e o de azul pelo x
+
+    float fator_verde = (xy.y+1.0)/2.0;
+    float fator_azul = (xy.x+1.0)/2.0;
+
+    float red = corrigido;
+    float green = corrigido * fator_verde;
+    float blue = corrigido * fator_azul;
+
+    //*****************************
+    // Aplica a cor
+    gl_FragColor = vec4(red, green, blue, 1.0);
+}
+
+// Clique em Run GLSL para rodar o código ;)</pre>
+        </v>
+    </div>
+    <div id="side">
+        <div class="boxed">
+            <p>JS preview</p>
+            <canvas id="jscanvas" height="6000" width="6000">
+                The preview lives here
+            </canvas>
+            <p>GLSL preview</p>
+            <canvas id="glslcanvas" height="6000" width="6000">
+                The preview lives here
+            </canvas>
+        </div>
+        <button onclick="runJS()">Run JS</button>
+        <button onclick="runGLSL()">Run GLSL</button>
+        <p>Logs:</p>
+        <ul id="log">
+
+        </ul>
+    </div>
+    
+    <script>
+        let catchKey = (e) => {
+            //console.log(document.getSelection())
+            if(e.keyCode == 9) {
+                e.preventDefault()
+                alert("O tab não funciona/tab does not work. :/")
+            }
+            //console.log(e)
+        }
+
+        let switchPane = (e) => {
+            console.log(e)
+            let children = document.querySelector("tabs").children
+            for(let i = 0; i < children.length; i++)
+                children[i].classList.remove("active");
+            e.srcElement.classList.add("active")
+
+            children = document.querySelector("v").children
+            for(let i = 0; i < children.length; i++)
+                children[i].classList.remove("active");
+            document.querySelector(e.srcElement.getAttribute("x_tgt")).classList.add("active");
+        }
+
+        let defaultKey = (e) => {
+            //console.log(document.getSelection())
+            if(e.keyCode == 9) {
+                e.preventDefault()
+            }
+            //console.log(e)
+        }
+
+        let runGLSL = () => {
+            const gl = document.querySelector("#glslcanvas").getContext("webgl")
+            if(gl == null) { 
+                alert("Web GL not supported, try using anothe browser or computer")
+                return;
+            }
+
+            let t = window.performance.now()
+
+            gl.clearColor(0, 0, 0, 1)
+            gl.clear(gl.COLOR_BUFFER_BIT)
+            
+            const vsSource = `
+                attribute vec4 aVertexPosition;
+                attribute vec4 aVertexColor;
+
+                uniform mat4 uModelViewMatrix;
+                uniform mat4 uProjectionMatrix;
+
+                varying lowp vec4 vColor;
+
+                void main() {
+                   gl_Position = /*uProjectionMatrix * uModelViewMatrix */ aVertexPosition;
+                   vColor = aVertexColor;
+                }
+                `;
+
+            const fsSource = document.querySelector("#glsltext").innerText
+            
+            const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+            if(shaderProgram == null) {
+                alert("Error compiling shader program")
+                return;
+            }
+            
+            const programInfo = {
+                program: shaderProgram,
+                attribLocations: {
+                    vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+                    vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
+                },
+                uniformLocations: {
+                projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
+                modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+                },
+            };
+
+            const buffers = initBuffers(gl)
+
+            drawScene(gl, programInfo, buffers)
+            gl.flush()
+            let dur = window.performance.now() - t;
+            let li = document.createElement("li");
+            li.innerHTML = `GLSL time = ${dur.toFixed(2)}ms`
+
+            document.querySelector("#log").appendChild(li);
+        }
+
+        let runJS = () => {
+            const ctx = document.querySelector("#jscanvas").getContext("2d")
+            if(ctx == null) { 
+                alert("Canvas not supported, try using anothe browser or computer")
+                return;
+            }
+
+    
+            const imageData = ctx.getImageData(0, 0, 6000, 6000);
+
+            const jsSource = document.querySelector("#jstext").innerText
+
+            try {
+
+            let t = window.performance.now()
+
+            const f = eval(jsSource)
+    
+            const data = imageData.data;
+            
+            f(data)
+
+            ctx.putImageData(imageData, 0, 0);
+            let dur = window.performance.now() - t;
+            let li = document.createElement("li");
+            li.innerHTML = `JS time = ${dur.toFixed(2)}ms`
+
+            document.querySelector("#log").appendChild(li);
+
+            } catch (e) {
+                alert("JS error: "+e)
+            }
+        }
+
+
+        // imported from https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Adding_2D_content_to_a_WebGL_context
+        //
+        // Initialize a shader program, so WebGL knows how to draw our data
+        //
+        function initShaderProgram(gl, vsSource, fsSource) {
+            const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
+            const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
+
+            // Create the shader program
+
+            const shaderProgram = gl.createProgram();
+            gl.attachShader(shaderProgram, vertexShader);
+            gl.attachShader(shaderProgram, fragmentShader);
+            gl.linkProgram(shaderProgram);
+
+            // If creating the shader program failed, alert
+
+            if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
+                return null;
+            }
+
+            return shaderProgram;
+        }
+
+        //
+        // creates a shader of the given type, uploads the source and
+        // compiles it.
+        //
+        function loadShader(gl, type, source) {
+            const shader = gl.createShader(type);
+
+            // Send the source to the shader object
+
+            gl.shaderSource(shader, source);
+
+            // Compile the shader program
+
+            gl.compileShader(shader);
+
+            // See if it compiled successfully
+
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+
+            return shader;
+        }
+
+        function initBuffers(gl) {
+
+            // Create a buffer for the square's positions.
+
+            const positionBuffer = gl.createBuffer();
+
+            // Select the positionBuffer as the one to apply buffer
+            // operations to from here out.
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+            // Now create an array of positions for the square.
+
+            const positions = [
+            -1.0,  1.0,
+            1.0,  1.0,
+            -1.0, -1.0,
+            1.0, -1.0,
+            ];
+
+            // Now pass the list of positions into WebGL to build the
+            // shape. We do this by creating a Float32Array from the
+            // JavaScript array, then use it to fill the current buffer.
+
+            gl.bufferData(gl.ARRAY_BUFFER,
+                        new Float32Array(positions),
+                        gl.STATIC_DRAW);
+
+
+            
+            const colors = [
+                1.0,  1.0,  1.0,  1.0,    // white
+                1.0,  0.0,  0.0,  1.0,    // red
+                0.0,  1.0,  0.0,  1.0,    // green
+                0.0,  0.0,  1.0,  1.0,    // blue
+            ];
+
+            const colorBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+
+            return {
+                position: positionBuffer,
+                color: colorBuffer,
+            };
+        }
+
+        function drawScene(gl, programInfo, buffers) {
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+            gl.clearDepth(1.0);                 // Clear everything
+            gl.enable(gl.DEPTH_TEST);           // Enable depth testing
+            gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
+
+            // Clear the canvas before we start drawing on it.
+
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+            // Create a perspective matrix, a special matrix that is
+            // used to simulate the distortion of perspective in a camera.
+            // Our field of view is 45 degrees, with a width/height
+            // ratio that matches the display size of the canvas
+            // and we only want to see objects between 0.1 units
+            // and 100 units away from the camera.
+
+            const fieldOfView = 45 * Math.PI / 180;   // in radians
+            const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+            const zNear = 0.1;
+            const zFar = 100.0;
+            const projectionMatrix = mat4.create();
+
+            // note: glmatrix.js always has the first argument
+            // as the destination to receive the result.
+            mat4.perspective(projectionMatrix,
+                            fieldOfView,
+                            aspect,
+                            zNear,
+                            zFar);
+
+            // Set the drawing position to the "identity" point, which is
+            // the center of the scene.
+            const modelViewMatrix = mat4.create();
+
+            // Now move the drawing position a bit to where we want to
+            // start drawing the square.
+
+            mat4.translate(modelViewMatrix,     // destination matrix
+                            modelViewMatrix,     // matrix to translate
+                            [-0.0, 0.0, -6.0]);  // amount to translate
+
+            // Tell WebGL how to pull out the positions from the position
+            // buffer into the vertexPosition attribute.
+            {
+                const numComponents = 2;  // pull out 2 values per iteration
+                const type = gl.FLOAT;    // the data in the buffer is 32bit floats
+                const normalize = false;  // don't normalize
+                const stride = 0;         // how many bytes to get from one set of values to the next
+                                        // 0 = use type and numComponents above
+                const offset = 0;         // how many bytes inside the buffer to start from
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+                gl.vertexAttribPointer(
+                    programInfo.attribLocations.vertexPosition,
+                    numComponents,
+                    type,
+                    normalize,
+                    stride,
+                    offset);
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexPosition);
+            }
+
+            // Tell WebGL how to pull out the colors from the color buffer
+            // into the vertexColor attribute.
+            {
+                const numComponents = 4;
+                const type = gl.FLOAT;
+                const normalize = false;
+                const stride = 0;
+                const offset = 0;
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
+                gl.vertexAttribPointer(
+                    programInfo.attribLocations.vertexColor,
+                    numComponents,
+                    type,
+                    normalize,
+                    stride,
+                    offset);
+                gl.enableVertexAttribArray(
+                    programInfo.attribLocations.vertexColor);
+            }
+
+            // Tell WebGL to use our program when drawing
+
+            gl.useProgram(programInfo.program);
+
+            // Set the shader uniforms
+
+            gl.uniformMatrix4fv(
+                programInfo.uniformLocations.projectionMatrix,
+                false,
+                projectionMatrix);
+            gl.uniformMatrix4fv(
+                programInfo.uniformLocations.modelViewMatrix,
+                false,
+                modelViewMatrix);
+
+            {
+                const offset = 0;
+                const vertexCount = 4;
+                gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+            }
+        }
+
+    </script>
+</body>
+</html>
