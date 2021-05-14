@@ -13,14 +13,72 @@
   	<p>
   	<hr/>
     <h2>
-      Proposta  
+      Proposta
     </h2>
     <p>
-      Em desenvolvimento
+      A arquitetura RISC-V é um ISA aberta lançada em 2010 que vem ganhando espaço em aplicações comerciais.
     </p>
+    <p>
+      A proposta deste TCC é o desenvolvimento e verificação de um núcleo RISC-V RV32E que seja pequeno e com suporte as extensões A, C, Zicsr e Zifencei. O núcleo tem como alvo o seu uso em sistemas embarcados que possuam restrições de tamanho físico ou de custo. Será usado como base projetos como o SERV [1] e PicoRV32 [2] que oferecem núcleos pequenos, porém sem o suporte ao conjunto de extensões propostas. O suporte ao conjunto proposto permitirá o uso de instruções compactas (que reduz o tamanho dos programas para RISC-V em torno de 30%) bem como o suporte execução privilegiada para rodar código de terceiros de forma segura.
+    </p>
+    <p>
+      Se espera no fim do trabalho a implementação da CPU em Verilog, síntese da mesma em uma FPGA (Xilinx Artix 7) e um conjunto de softwares que demonstrem o funcionamento do chip além da documentação de todo o projeto.
+    </p>
+    <ol>
+      <li><a href="https://github.com/olofk/serv">https://github.com/olofk/serv</a></li>
+      <li><a href="http://github.com/cliffordwolf/picorv32">https://github.com/cliffordwolf/picorv32</a></li>
+    </ol>
     <h2>
-      Anotações de progresso (750/28800 min ou 2,6%)
+      Progresso
     </h2>
+    <ol>
+      <li>Apreender Verilog (✅)</li>
+      <li>Adquirir a FPGA (aguardando entrega)</li>
+      <li>Apreender a usar a FPGA (depende de 2)</li>
+      <li>Estudo da arquitetura RISC-V (trabalhando)</li>
+      <li>Desenvolvimento de um simulador para validar conhecimento da arquitetura (trabalhando)</li>
+      <li>Preparar conjunto de software para validar a arquitetura (depende de 4)</li>
+      <li>Desenvolvimento do núcleo (depende de 3 e 5)</li>
+      <li>Síntese do núcleo na FPGA (depende de 7)</li>
+      <li>Validação do núcleo sintentizado(depende de 7)</li>
+      <li>Organização da documentação (depende de 9)</li>
+      <li>Escrever Monografia (depende de tudo acima)</li>
+      <li>Poster do TCC (depende de tudo acima)</li>
+      <li>Apresentar TCC (depende de tudo acima)</li>
+      <li>Finalizar a página do TCC (depende de tudo acima)</li>
+    </ol>
+    <h2>
+      Envolvidos  
+    </h2>
+    <ul>
+      <li> Nina S. T. Hirata (<a href="https://www.ime.usp.br/~nina/">website</a>) - Responsável</li>
+      <li> Alfredo Goldman (<a href="https://www.ime.usp.br/~gold/">website</a>) - Supervisor</li>
+      <li> Carlos Eduardo de Paula (<a href="https://twitter.com/carlosedp/">@carlosedp</a>, <a href="http://carlosedp.com">website</a>) - Mentor </li>
+      <li> Eu (<a href="https://twitter.com/minifyit">@minifyit</a>, <a href="http://blog.silva.moe">website</a>) - Aluna </li>
+    </ul>
+    <h2>
+      Anotações de progresso (840/28800 min ou 2,9%)
+    </h2>
+    <blockquote>
+  	  <h3>
+  	    2021-05-15 (30 min) [pre]
+  	  </h3>
+  	  <p>
+        Desenvolvimento da proposta e definição de objetivos parciais.
+  	  </p>
+  	</blockquote>
+	  <blockquote>
+  	  <h3>
+  	    2021-05-14 (60 min) [pre]
+  	  </h3>
+  	  <p>
+        Ingresso do Carlos Eduardo (<a href="https://twitter.com/carlosedp/">@carlosedp</a>) como mentor no projeto.
+        Ele é embaixador RISC-V no Brasil e seu conhecimento técnico no assunto é de grande valor.
+        Realizamos uma conversa acerca do modelo de FPGA a ser comprado e fechamos na Artix 7 da Xilinx.
+        Realizei a aquisicão da placa XC7A100T Wukong da QMTECH e um JTAG para realizar a programação.
+        O equipamento deve chegar na metade de junho.
+  	  </p>
+  	</blockquote>
     <blockquote>
   	  <h3>
   	    2021-05-10 (240 min) [pre]
@@ -31,7 +89,7 @@
         e escrita de um breve texto sobre a mesma. <a href="./RVV.html">Acesse aqui</a>.
   	  </p>
   	</blockquote>
-	  <blockquote>
+	<blockquote>
   	  <h3>
   	    2021-04-27 (240 min) [pre]
   	  </h3>
@@ -79,5 +137,9 @@
   	    </a>.
   	  </p>
   	</blockquote>
+    <hr/>
+    <p>
+      Esclarecimento: Oficialmente Elisa Silva é conhecida como Vitor Silva.
+    </p>
   </body>
 </html>
