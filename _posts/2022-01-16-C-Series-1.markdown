@@ -1,0 +1,70 @@
+---
+layout: post
+title:  "C in tiny bits - Hello World"
+date:   2022-01-16 23:00:00 -0300
+categories: update
+---
+Learning to program is not an easy task. It usually involves the mix and match of many concepts, but you cannot learn all at once and this leads to small holes in knowledge that are hard to backtrack and fill.
+
+*C in tiny bits* is my series about important C concepts that intends to help fill those small holes.
+
+So let's begin by the classical C `hello world` program:
+
+```c
+#include <stdio.h>
+
+int main(int argc, char **argv) {
+    puts("Hello World!");
+    return 0;
+}
+```
+
+There you can find many points of interest, but let cover those slowly, starting out with boxes and values.
+
+# Names and values
+
+In this program you can find some words of interest: `main`, `argc`, `argv` and `puts`. Those are names and they are used to represent boxes. Each box contains a certain amount of data and may be used in different ways. Boxes also have lifetime, but this is a topic for another post.
+
+In terms of value, or the data that is in each box, C have (basically) 3 different interpretations of it: *value*, *pointer*, and *function pointer*.
+
+Beign a weak-typed language, the you can change the way the data is interpreted at your own risk and this can be usefull later down the line.
+
+`main` and `puts` are boxes that have their values threated as *function pointers*. In the case of `main` we are declaring how it function works and in the case of `puts` we are calling the function.
+
+Functions may have arguments (that are also boxes), and in the case of `main`, it has `argc` and `argv` boxes as arguments.
+
+
+# Nameless boxes
+
+Sometimes you care about the content of a box and not about it's name, so C gives you ways to declare boxes without proper names, but with a specific content. In the case of `"Hello World!"`, it 
+is a box that contains the senquence of characters that represents the *string* (in a vague sense) of text **Hello World!**.
+
+The same is valid for the `0` that represents a specific box that has a value that represents the number 0.
+
+# Under the hood
+
+We are not going to dive much futher in this post, but as C expose many things that are related to the inner workings of a modern computer, it's important to understand that this box idea is an abstraction that get's mapped into the computer memory, and the language enables you to threat those boxes as such.
+
+This is great for programming closer to bare metal, but also gets very confunsing if you don't have a good mental model of a computer.
+
+Basically (and in modern terms) the computer has a sequence of boxes (memory), that contains one *byte* each. A *byte* is a sequence of 8 *bits* and it represent 256 diffentes values. Sometimes it's usefull to map those values to the sequence of numbers from 0 to 255, but you can interpret those values in many diffent ways.
+
+Those C boxes with names are maped to groups of memory boxes in order, such that its contents are represented by the collection of values of the memory boxes that represents them.
+
+# Making some sense of this
+
+This may be too abstract for the taste of many, but bare with me a little more.
+
+In C is very common to interpreset bytes as ASCII characters. You can search the term, but, in simple terms, ASCII is a table that maps 128 values to typewriter instructions such as *type A* of *enter a linefeed*.
+
+Ignoring the fact that typewriters are not a thing anymore, you can imagine that the sequence of instructions `type H`, `type e`, `type l`, `type l`, and `type o` are a good way to represent the word `Hello`. And as each byte can represent 256 different values, you can fit an ASCII character into a byte.
+
+Then `"Hello World!"` is used to describe a box that in the memory is represent by the sequence of bytes that maps to the ASCII characters `type H`, `type e`, ..., and so on, and `puts` is a function that somehow makes this string visible to the user.
+
+# Size and final thoughts
+
+There is much more to say about those C *boxes*, but it is important to cover some other topics before diving deeper into it. But just to make it clear, *boxes* are not an official name as far as I know, but I think this is a great abstraction.
+
+Closing for today, an important concept is the size of a C box, or how many memory boxes are necessary to represent the a given C box. There is even an important operator in C that is used get the size of any box, the `sizeof` operator.
+
+The rest of the language can be seen as ways to manipulates the value of those boxes, but let's not get ahead of ourselves.
