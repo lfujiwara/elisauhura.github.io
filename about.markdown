@@ -4,7 +4,7 @@ title: About
 permalink: /about/
 ---
 
-My name is Elisa Uhura and currently I'm an undergrad in Computer Science at University of São Paulo in Brazil.
+My name is Elisa Uhura and currently I'm Business Analyst at Itaú BBA and Bachelor of Computer Science by University of São Paulo in Brazil.
 
 During my BSc Computer Science I've had 2 TA experiences:
 one in "Introduction to Computer Science" and another in "Concurrent and Parallel Programming",
